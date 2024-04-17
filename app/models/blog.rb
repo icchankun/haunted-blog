@@ -10,15 +10,11 @@ class Blog < ApplicationRecord
   scope :published, -> { where('secret = FALSE') }
 
   scope :search, lambda { |term|
-    sanitized_term = Blog.sanitize_term(term)
+    sanitized_term = term.nil? ? '%' : "%#{sanitize_sql_like(term)}%"
     where('title LIKE ? OR content LIKE ?', sanitized_term, sanitized_term)
   }
 
   scope :default_order, -> { order(id: :desc) }
-
-  def self.sanitize_term(term)
-    term.nil? ? '%' : "%#{sanitize_sql_like(term)}%"
-  end
 
   def owned_by?(target_user)
     user == target_user
